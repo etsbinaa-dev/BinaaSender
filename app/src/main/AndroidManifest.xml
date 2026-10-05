@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- الصلاحية الوحيدة: تنزيل صورة الفاتورة من خادم binaa-center-hub فقط -->
+    <!-- تنزيل صورة الفاتورة من خادم binaa-center-hub فقط -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- زر «⬅ بناء» العائم فوق واتساب للرجوع إلى «فرز وإرسال» بعد الإرسال -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <!-- Android 11+: لازم لمعرفة إن كان واتساب بزنس مثبتًا -->
     <queries>

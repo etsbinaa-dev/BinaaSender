@@ -48,6 +48,15 @@ class SendActivity : Activity() {
                                 REQUEST_WHATSAPP,
                             )
                             waitingForWhatsApp = true
+                            if (ReturnBubble.canShow(this)) {
+                                ReturnBubble.show(this, request.returnUrl)
+                            } else {
+                                Toast.makeText(
+                                    this,
+                                    "لزر «⬅ بناء»: افتح تطبيق Binaa Sender وفعّل الإذن",
+                                    Toast.LENGTH_LONG,
+                                ).show()
+                            }
                         } catch (e: Exception) {
                             Toast.makeText(this, "تعذر فتح واتساب بزنس", Toast.LENGTH_LONG).show()
                             finish()

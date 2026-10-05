@@ -1,6 +1,9 @@
 package com.binaa.sender
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -22,6 +25,8 @@ import android.widget.Toast
 class MainActivity : Activity() {
 
     private lateinit var statusText: TextView
+    private lateinit var bubbleStatus: TextView
+    private lateinit var bubbleButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +49,25 @@ class MainActivity : Activity() {
 
         statusText = TextView(this).apply { textSize = 16f }
         root.addView(statusText)
+
+        // زر «⬅ بناء» فوق واتساب يحتاج هذا الإذن مرة واحدة
+        bubbleStatus = TextView(this).apply {
+            textSize = 16f
+            setPadding(0, pad / 2, 0, 0)
+        }
+        root.addView(bubbleStatus)
+        bubbleButton = Button(this).apply {
+            text = "تفعيل زر «⬅ بناء» فوق واتساب"
+            setOnClickListener {
+                startActivity(
+                    Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:$packageName"),
+                    ),
+                )
+            }
+        }
+        root.addView(bubbleButton)
 
         root.addView(TextView(this).apply {
             text = "تجربة: أدخل رقمك (8 أرقام) لفتح محادثته بصورة تجريبية"
@@ -70,6 +94,13 @@ class MainActivity : Activity() {
         } else {
             "واتساب بزنس: غير مثبت ❌"
         }
+        val bubbleOk = ReturnBubble.canShow(this)
+        bubbleStatus.text = if (bubbleOk) {
+            "زر «⬅ بناء» للرجوع بعد الإرسال: مفعّل ✅"
+        } else {
+            "زر «⬅ بناء» للرجوع بعد الإرسال: غير مفعّل ❌"
+        }
+        bubbleButton.visibility = if (bubbleOk) View.GONE else View.VISIBLE
     }
 
     private fun runTest(rawPhone: String) {
