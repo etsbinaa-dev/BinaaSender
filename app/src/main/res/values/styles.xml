@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        SendActivity: نافذة شفافة تمامًا وبلا حركة انتقال، فلا يرى المستخدم
+        «Binaa Sender» بين «بناء» وواتساب.
+    -->
+    <style name="Theme.Binaa.Invisible" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+</resources>

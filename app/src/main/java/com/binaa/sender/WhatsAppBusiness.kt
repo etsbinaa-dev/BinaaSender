@@ -31,7 +31,5 @@ object WhatsAppBusiness {
             if (text.isNotBlank()) putExtra(Intent.EXTRA_TEXT, text)
             putExtra("jid", "$phoneDigits@s.whatsapp.net")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            // بلا FLAG_ACTIVITY_NEW_TASK: واتساب يُفتح «لنتيجة» داخل مهمة Binaa Sender،
-            // فحين ينتهي (بعد الإرسال أو بزر الرجوع) نعود مباشرة إلى المتصفح
         }
 }
