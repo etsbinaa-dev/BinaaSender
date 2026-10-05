@@ -6,6 +6,9 @@ on:
     branches: [ main ]
   pull_request:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -40,8 +43,17 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: binaa-sender-apk
-          path: app/build/outputs/apk/debug/*.apk
+      # ملف الـ APK يُنشر كـ Release (لا يُحسب ضمن مساحة Actions المحدودة).
+      # عند الدفع إلى main فقط؛ في الـ PR يكفي التأكد أن البناء ينجح.
+      - name: Publish APK as a release
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          TAG="v${VERSION}-${GITHUB_RUN_NUMBER}"
+          cp app/build/outputs/apk/debug/app-debug.apk "binaa-sender-${VERSION}.apk"
+          gh release create "$TAG" "binaa-sender-${VERSION}.apk" \
+            --title "Binaa Sender ${VERSION}" \
+            --notes "بناء رقم ${GITHUB_RUN_NUMBER} من ${GITHUB_SHA::7}" \
+            --target "$GITHUB_SHA"
