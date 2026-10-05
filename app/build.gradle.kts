@@ -13,11 +13,13 @@ android {
         targetSdk = 34
         // يزيد تلقائيًا مع كل تشغيل CI؛ البناء المحلي = 1
         versionCode = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
-        versionName = "0.3"
+        versionName = "0.4"
 
         // الخادم الوحيد المسموح تنزيل صور الفواتير منه (Supabase الخاص بـ binaa-center-hub)
         buildConfigField("String", "ALLOWED_HOST", "\"qtlsyaqfmrxnhmnxfzdo.supabase.co\"")
         buildConfigField("String", "ALLOWED_PATH_PREFIX", "\"/storage/v1/object/sign/invoice-files/\"")
+        // زر «⬅ بناء» يعود إلى هذا الموقع فقط
+        buildConfigField("String", "RETURN_HOST", "\"binaa-center-hub.lovable.app\"")
     }
 
     buildFeatures {
