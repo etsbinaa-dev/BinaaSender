@@ -3,6 +3,7 @@ package com.binaa.sender
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
@@ -126,13 +127,23 @@ object ReturnBubble {
 
     private fun goBack(context: Context, returnUrl: String) {
         hide()
+        val pm = context.packageManager
+        val viewIntent = Intent(Intent.ACTION_VIEW, Uri.parse(returnUrl))
+        // تطبيق «بناء» المثبّت من Chrome (WebAPK): نُظهر نافذته المفتوحة كما هي
+        // (بلا شاشة الشعار وبلا إعادة تحميل)، كما لو ضُغطت أيقونته.
+        val webApk = runCatching {
+            pm.queryIntentActivities(viewIntent, PackageManager.MATCH_ALL)
+                .map { it.activityInfo.packageName }
+                .firstOrNull { it.startsWith("org.chromium.webapk") }
+        }.getOrNull()
+        val resume = webApk?.let { pm.getLaunchIntentForPackage(it) }
         try {
-            // رابط الـ Hub نفسه: إن كان مثبتًا كتطبيق (PWA) يُفتح فيه، وإلا في المتصفح.
-            // صفحة «فرز وإرسال» تستأنف الإرسال المتتابع من حيث توقف.
-            context.startActivity(
-                Intent(Intent.ACTION_VIEW, Uri.parse(returnUrl))
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-            )
+            if (resume != null) {
+                context.startActivity(resume.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            } else {
+                // بدون تطبيق مثبّت: رابط الـ Hub في المتصفح؛ «فرز وإرسال» تستأنف الإرسال
+                context.startActivity(viewIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            }
         } catch (e: Exception) {
             Toast.makeText(context, "تعذر فتح binaa hub", Toast.LENGTH_LONG).show()
         }

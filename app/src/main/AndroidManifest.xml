@@ -10,6 +10,11 @@
     <!-- Android 11+: لازم لمعرفة إن كان واتساب بزنس مثبتًا -->
     <queries>
         <package android:name="com.whatsapp.w4b" />
+        <!-- لإيجاد تطبيق «بناء» المثبّت (WebAPK) والرجوع إلى نافذته مباشرة -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" android:host="binaa-center-hub.lovable.app" />
+        </intent>
     </queries>
 
     <application
