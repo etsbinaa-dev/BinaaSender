@@ -52,6 +52,23 @@
             </intent-filter>
         </activity>
 
+        <!--
+            واتساب بزنس صار يتجاهل رقم المحادثة ويفتح «Envoyer à…»: هذه الخدمة تختار
+            محادثة العميل هناك (بحث برقمه). لا ترسل شيئًا. تُفعَّل مرة من الإعدادات.
+        -->
+        <service
+            android:name=".ChatPickerService"
+            android:exported="false"
+            android:label="Binaa Sender — اختيار المحادثة"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/chat_picker_service" />
+        </service>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.files"

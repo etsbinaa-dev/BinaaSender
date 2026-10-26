@@ -42,6 +42,8 @@ class SendActivity : Activity() {
                         try {
                             // واتساب لا يرجع وحده بعد الإرسال (جُرّب)، فلا ننتظره: نفتحه
                             // ونُغلق فورًا بلا حركة، وزر «⬅ بناء» هو طريق الرجوع
+                            // إن تجاهل واتساب الرقم وفتح «Envoyer à…»، تختار ChatPickerService المحادثة
+                            PendingChat.set(this, request.phoneDigits)
                             startActivity(
                                 WhatsAppBusiness.buildIntent(files, request.phoneDigits, request.text)
                                     .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
