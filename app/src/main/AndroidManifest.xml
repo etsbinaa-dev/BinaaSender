@@ -43,6 +43,8 @@
             android:name=".SendActivity"
             android:exported="true"
             android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:noHistory="true"
             android:theme="@style/Theme.Binaa.Invisible">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
