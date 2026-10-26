@@ -24,12 +24,12 @@ object OutgoingFiles {
     fun cleanupOld(context: Context) {
         val now = System.currentTimeMillis()
         dir(context).listFiles()?.forEach {
-            if (now - it.lastModified() > MAX_AGE_MS) it.delete()
+            if (now - it.lastModified() > MAX_AGE_MS) it.deleteRecursively()
         }
     }
 
     /** يشغَّل على Thread خلفية فقط. يرجع (Uri, mimeType) أو يرمي IOException برسالة عربية. */
-    fun download(context: Context, imageUrl: String): Pair<Uri, String> {
+    fun download(context: Context, imageUrl: String, fileName: String = ""): Pair<Uri, String> {
         val conn = URL(imageUrl).openConnection() as HttpURLConnection
         try {
             conn.instanceFollowRedirects = false // لا انتقال لأي خادم آخر
@@ -47,11 +47,16 @@ object OutgoingFiles {
                 "image/jpeg", "image/jpg" -> "jpg"
                 "image/png" -> "png"
                 "image/webp" -> "webp"
-                else -> throw IOException("الملف ليس صورة")
+                "application/pdf" -> "pdf"
+                else -> throw IOException("الملف ليس صورة ولا PDF")
             }
             if (conn.contentLengthLong > MAX_BYTES) throw IOException("الصورة كبيرة جدًا")
 
-            val out = File(dir(context), "invoice-${System.currentTimeMillis()}.$ext")
+            // PDF: اسمه يظهر للزبون في واتساب، فنعطيه اسمًا مفهومًا في مجلد خاص به
+            val out = if (ext == "pdf") {
+                val sub = File(dir(context), "f${System.currentTimeMillis()}").apply { mkdirs() }
+                File(sub, (fileName.ifBlank { "Releve" }).removeSuffix(".pdf") + ".pdf")
+            } else File(dir(context), "invoice-${System.currentTimeMillis()}.$ext")
             conn.inputStream.use { input ->
                 out.outputStream().use { output ->
                     val buf = ByteArray(16 * 1024)
@@ -69,7 +74,11 @@ object OutgoingFiles {
                     }
                 }
             }
-            return uriFor(context, out) to (if (ext == "jpg") "image/jpeg" else "image/$ext")
+            return uriFor(context, out) to when (ext) {
+                "jpg" -> "image/jpeg"
+                "pdf" -> "application/pdf"
+                else -> "image/$ext"
+            }
         } finally {
             conn.disconnect()
         }

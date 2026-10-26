@@ -27,6 +27,8 @@ class MainActivity : Activity() {
     private lateinit var statusText: TextView
     private lateinit var bubbleStatus: TextView
     private lateinit var bubbleButton: Button
+    private lateinit var pickerStatus: TextView
+    private lateinit var pickerButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +71,18 @@ class MainActivity : Activity() {
         }
         root.addView(bubbleButton)
 
+        // واتساب بزنس يفتح «Envoyer à…» بدل محادثة العميل: الخدمة تختارها
+        pickerStatus = TextView(this).apply {
+            textSize = 16f
+            setPadding(0, pad / 2, 0, 0)
+        }
+        root.addView(pickerStatus)
+        pickerButton = Button(this).apply {
+            text = "تفعيل اختيار محادثة العميل تلقائيًا"
+            setOnClickListener { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
+        }
+        root.addView(pickerButton)
+
         root.addView(TextView(this).apply {
             text = "تجربة: أدخل رقمك (8 أرقام) لفتح محادثته بصورة تجريبية"
             setPadding(0, pad, 0, pad / 4)
@@ -101,6 +115,13 @@ class MainActivity : Activity() {
             "زر «⬅ بناء» للرجوع بعد الإرسال: غير مفعّل ❌"
         }
         bubbleButton.visibility = if (bubbleOk) View.GONE else View.VISIBLE
+        val pickerOk = ChatPickerService.isEnabled(this)
+        pickerStatus.text = if (pickerOk) {
+            "اختيار محادثة العميل تلقائيًا: مفعّل ✅"
+        } else {
+            "اختيار محادثة العميل تلقائيًا: غير مفعّل ❌ (الإعدادات ← تسهيل الاستخدام ← Binaa Sender)"
+        }
+        pickerButton.visibility = if (pickerOk) View.GONE else View.VISIBLE
     }
 
     private fun runTest(rawPhone: String) {
@@ -116,6 +137,7 @@ class MainActivity : Activity() {
         OutgoingFiles.cleanupOld(this)
         val (uri, mime) = OutgoingFiles.saveTestImage(this, buildTestImage())
         try {
+            PendingChat.set(this, phone)
             startActivity(WhatsAppBusiness.buildIntent(uri, mime, phone, "رسالة تجريبية من Binaa Sender"))
         } catch (e: Exception) {
             Toast.makeText(this, "تعذر فتح واتساب بزنس", Toast.LENGTH_LONG).show()

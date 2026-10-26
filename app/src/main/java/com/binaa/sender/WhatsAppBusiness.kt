@@ -23,6 +23,20 @@ object WhatsAppBusiness {
         false
     }
 
+    /** عدة ملفات (صفحات كشف الحساب): ترفق كلها في نفس المحادثة. */
+    fun buildIntent(files: List<Pair<Uri, String>>, phoneDigits: String, text: String): Intent {
+        if (files.size == 1) return buildIntent(files[0].first, files[0].second, phoneDigits, text)
+        val mimes = files.map { it.second }.toSet()
+        return Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+            setPackage(PACKAGE)
+            type = if (mimes.size == 1) mimes.first() else if (mimes.all { it.startsWith("image/") }) "image/*" else "*/*"
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(files.map { it.first }))
+            if (text.isNotBlank()) putExtra(Intent.EXTRA_TEXT, text)
+            putExtra("jid", "$phoneDigits@s.whatsapp.net")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    }
+
     fun buildIntent(imageUri: Uri, mimeType: String, phoneDigits: String, text: String): Intent =
         Intent(Intent.ACTION_SEND).apply {
             setPackage(PACKAGE)

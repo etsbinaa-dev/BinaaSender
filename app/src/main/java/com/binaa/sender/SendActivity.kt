@@ -29,8 +29,8 @@ class SendActivity : Activity() {
         val appContext = applicationContext
         Thread {
             OutgoingFiles.cleanupOld(appContext)
-            val result: Result<Pair<Uri, String>> = try {
-                Result.success(OutgoingFiles.download(appContext, request.imageUrl))
+            val result: Result<List<Pair<Uri, String>>> = try {
+                Result.success(request.fileUrls.map { OutgoingFiles.download(appContext, it, request.fileName) })
             } catch (e: IOException) {
                 Result.failure(e)
             } catch (e: Exception) {
@@ -38,12 +38,14 @@ class SendActivity : Activity() {
             }
             runOnUiThread {
                 result.fold(
-                    onSuccess = { (uri, mime) ->
+                    onSuccess = { files ->
                         try {
                             // واتساب لا يرجع وحده بعد الإرسال (جُرّب)، فلا ننتظره: نفتحه
                             // ونُغلق فورًا بلا حركة، وزر «⬅ بناء» هو طريق الرجوع
+                            // إن تجاهل واتساب الرقم وفتح «Envoyer à…»، تختار ChatPickerService المحادثة
+                            PendingChat.set(this, request.phoneDigits)
                             startActivity(
-                                WhatsAppBusiness.buildIntent(uri, mime, request.phoneDigits, request.text)
+                                WhatsAppBusiness.buildIntent(files, request.phoneDigits, request.text)
                                     .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
                             )
                             if (ReturnBubble.canShow(this)) {
